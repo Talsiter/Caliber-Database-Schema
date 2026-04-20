@@ -41,8 +41,10 @@ WITH retail_incidents AS (
      WHERE i.report_date IS NOT NULL
        AND EXTRACT(YEAR FROM i.report_date) = :report_year
        AND i.agncy_cd_agency_code = 'TN0830400'
-       AND UPPER(NVL(no.nibrs_code, '')) = '23C'
-       AND UPPER(NVL(oc.offense_code, '')) IN ('39-14-103 - 26A', '39-14-104 - 26A')
+       AND (
+             UPPER(NVL(no.nibrs_code, '')) = '23C'
+             OR UPPER(NVL(oc.offense_code, '')) IN ('39-14-103 - 26A', '39-14-104 - 26A')
+           )
        --AND UPPER(NVL(i.inc_report_number, '')) = 'HDVL25-00400'
       
 ),
