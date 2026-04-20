@@ -61,6 +61,36 @@ case_numbers AS (
              WHERE ic.inc_case_number IS NOT NULL
            ) x
      GROUP BY x.incident_id
+),
+occurrence_addresses AS (
+    SELECT x.incident_id,
+           LISTAGG(x.occurrence_address, ' | ') WITHIN GROUP (ORDER BY x.occurrence_address) AS occurrence_addresses
+      FROM (
+            SELECT DISTINCT
+                   ia.incident_id,
+                   TRIM(
+                       REGEXP_REPLACE(
+                           NVL(a.street_number, '') || ' ' ||
+                           NVL(a.dirct_cd_direction_code, '') || ' ' ||
+                           NVL(a.street_name, '') || ' ' ||
+                           NVL(a.street_cd_street_type_code, '') || ' ' ||
+                           NVL(a.sub_number, '') || ', ' ||
+                           NVL(a.city, '') || ', ' ||
+                           NVL(a.state_cd_state_code, '') || ' ' ||
+                           NVL(a.zip5, '') ||
+                           CASE
+                               WHEN a.zip4 IS NOT NULL THEN '-' || TO_CHAR(a.zip4)
+                               ELSE ''
+                           END,
+                           ' +',
+                           ' '
+                       )
+                   ) AS occurrence_address
+              FROM incident_addresses ia
+              JOIN addresses a
+                ON a.address_id = ia.address_id
+           ) x
+     GROUP BY x.incident_id
 )
 SELECT
     ri.report_year,
@@ -68,6 +98,7 @@ SELECT
     ri.incident_id,
     ri.inc_report_number AS report_number,
     cn.case_numbers,
+    oa.occurrence_addresses AS offense_address,
     ri.report_date,
     ri.offense_code,
     ri.offense_desc,
@@ -76,4 +107,6 @@ SELECT
   FROM retail_incidents ri
   LEFT JOIN case_numbers cn
     ON cn.incident_id = ri.incident_id
+  LEFT JOIN occurrence_addresses oa
+    ON oa.incident_id = ri.incident_id
  ORDER BY ri.report_date, ri.inc_report_number, ri.incident_id, ri.offense_code;
