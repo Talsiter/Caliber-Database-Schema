@@ -27,6 +27,8 @@ WITH retail_incidents AS (
            EXTRACT(YEAR FROM i.report_date) AS report_year,
            oc.offense_code,
            oc.offense_desc,
+           o.place_place_code AS place_code,
+           ep.description AS place_desc,
            no.nibrs_code,
            nc.nibrs_desc
       FROM incidents i
@@ -38,6 +40,9 @@ WITH retail_incidents AS (
         ON no.offense_code = oc.offense_code
       LEFT JOIN nibrs_codes nc
         ON nc.nibrs_code = no.nibrs_code
+      LEFT JOIN ejs_codes ep
+        ON ep.code_type = o.place_code_type
+       AND ep.code = o.place_place_code
      WHERE i.report_date IS NOT NULL
        AND EXTRACT(YEAR FROM i.report_date) = :report_year
        AND i.agncy_cd_agency_code = 'TN0830400'
@@ -102,6 +107,8 @@ SELECT
     ri.report_date,
     ri.offense_code,
     ri.offense_desc,
+    ri.place_code,
+    ri.place_desc,
     ri.nibrs_code,
     ri.nibrs_desc
   FROM retail_incidents ri
