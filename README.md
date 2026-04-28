@@ -2,6 +2,20 @@
 
 ## SQL Files
 
+
+## Updated More Inclusive SQL Files
+
+The `Updated More Inclusive/` directory now contains a full set of mirrored SQL files from `sql/` with expanded retail filtering and place details.
+
+Common additions in those mirrored queries:
+- `o.place_place_code AS place_code`
+- `ep.description AS place_desc` (via `LEFT JOIN ejs_codes ep` on offense place code type/code)
+- expanded offense filter:
+  - `UPPER(NVL(no.nibrs_code, '')) = '23C'`
+  - OR `UPPER(NVL(oc.offense_code, '')) IN ('39-14-103 - 26A', '39-14-104 - 26A')`
+
+These updated files preserve each query's original purpose while including the added place metadata and broader offense criteria.
+
 ### 1) `sql/PROOF_TOTAL_REPORTS.sql`
 Data-vetting extract (detail rows) for total reports.
 
